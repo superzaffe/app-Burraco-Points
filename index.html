@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punteggio Burraco</title>
+    <!-- Configurazione PWA: Link al manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00BFFF">
+    <!-- Fine Configurazione PWA -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PWA / Mobile App Icon Setup (Aggiungi a Schermata Home) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Burraco Points App">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" href="/1763141985824.jpg" type="image/jpg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a4325;
+            background-image: radial-gradient(circle, #2a6a3b 0%, #1a4325 70%);
+            color: #4b5563;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px; /* Ottimizzato per schermi mobile */
+        }
+        .card {
+            background-color: #f7f3e9;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            color: #333;
+        }
+        .input-group input {
+            padding: 12px;
+            border: 1px solid #d1c8b7;
+            border-radius: 12px;
+            background-color: #fff;
+        }
+        .btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .btn-primary {
+            background-image: linear-gradient(to right, #4c51bf, #667eea);
+            color: white;
+        }
+        .btn-secondary {
+            background-image: linear-gradient(to right, #10b981, #059669);
+            color: white;
+        }
+        .table-header {
+            background-color: #c0a87f;
+            color: #333;
+        }
+        .table-row-odd {
+            background-color: #fff;
+        }
+        .table-row-even {
+            background-color: #f7f3e9;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <div class="card p-6 md:p-8">
+            <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">Punteggio Burraco</h1>
+            <div id="messageBox" class="text-red-600 mb-4 text-center font-medium" style="display:none;"></div>
+
+            <!-- Sezione per aggiungere i giocatori (Pagina 1) -->
+            <div id="player-setup" class="space-y-8">
+                <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Aggiungi Giocatori</h2>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <input type="text" id="playerNameInput" placeholder="Nome Giocatore" class="flex-1 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="addPlayerBtn" class="btn btn-primary font-bold py-3 px-6 rounded-md">Aggiungi</button>
+                    </div>
+                </div>
+                
+                <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
+                     <h2 class="text-xl font-semibold mb-4 text-gray-700">Elenco Giocatori</h2>
+                     <ul id="playerList" class="list-disc list-inside space-y-2"></ul>
+                </div>
+
+                <div class="p-6 bg-gray-50 rounded-lg shadow-inner text-center">
+                    <button id="startGameBtn" class="btn btn-secondary w-full font-bold py-3 px-6 rounded-md">Inizia Partita</button>
+                </div>
+            </div>
+
+            <!-- Sezione per visualizzare i punteggi (Pagina 2) -->
+            <div id="score-view" class="hidden">
+                <!-- Tabella per i punteggi -->
+                <div class="p-6 bg-gray-50 rounded-lg shadow-inner mb-8">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Punteggi Attuali</h2>
+                    <div class="overflow-x-auto rounded-lg">
+                        <table class="min-w-full bg-white">
+                            <thead id="scoreTableHeader" class="table-header text-gray-800 uppercase text-sm leading-normal">
+                                <!-- L'header verrà generato dinamicamente -->
+                            </thead>
+                            <tbody id="scoreTableBody" class="text-gray-600 text-sm font-light">
+                                <!-- I giocatori verranno aggiunti qui dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Form per l'inserimento dei punti -->
+                <div class="p-6 bg-gray-50 rounded-lg shadow-inner">
+                    <h2 id="scoreUpdateTitle" class="text-xl font-semibold mb-4 text-gray-700">Aggiorna Punteggio - Punti di Chiusura</h2>
+                    <div id="scoreInputsContainer" class="space-y-4">
+                        <!-- Gli input per i punteggi verranno aggiunti qui dinamicamente -->
+                    </div>
+                    <div class="flex justify-end mt-6">
+                        <button id="confirmPointsBtn" class="btn btn-secondary font-bold py-2 px-4 rounded-md">Conferma Punti di Chiusura</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const players = {};
+            const roundScores = {};
+            const historyScores = [];
+            let currentPhase = 'chiusura';
+
+            // Elementi della prima pagina
+            const playerSetupDiv = document.getElementById('player-setup');
+            const playerNameInput = document.getElementById('playerNameInput');
+            const addPlayerBtn = document.getElementById('addPlayerBtn');
+            const playerList = document.getElementById('playerList');
+            const startGameBtn = document.getElementById('startGameBtn');
+
+            // Elementi della seconda pagina
+            const scoreViewDiv = document.getElementById('score-view');
+            const scoreTableHeader = document.getElementById('scoreTableHeader');
+            const scoreTableBody = document.getElementById('scoreTableBody');
+            const scoreUpdateTitle = document.getElementById('scoreUpdateTitle');
+            const scoreInputsContainer = document.getElementById('scoreInputsContainer');
+            const confirmPointsBtn = document.getElementById('confirmPointsBtn');
+
+            const messageBox = document.getElementById('messageBox');
+            
+            // Funzione per mostrare un messaggio di errore o di successo
+            function showMessage(message, type = 'error') {
+                messageBox.textContent = message;
+                messageBox.style.color = type === 'error' ? 'red' : 'green';
+                messageBox.style.display = 'block';
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 3000);
+            }
+
+            // Funzione per renderizzare la tabella in formato "trasposto" (a colonne)
+            function renderTable() {
+                // Genera l'header: Mano e nomi dei giocatori
+                scoreTableHeader.innerHTML = '';
+                const headerRow = document.createElement('tr');
+                headerRow.innerHTML = `<th class="py-3 px-6 text-left">Mano</th>`;
+                for (const name in players) {
+                    headerRow.innerHTML += `<th class="py-3 px-6 text-center">${name}</th>`;
+                }
+                scoreTableHeader.appendChild(headerRow);
+                
+                // Genera il corpo della tabella
+                scoreTableBody.innerHTML = '';
+                let cumulativeScores = {};
+                for (const name in players) {
+                    cumulativeScores[name] = 0;
+                }
+
+                historyScores.forEach((round, index) => {
+                    const row = document.createElement('tr');
+                    row.className = `border-b border-gray-200 hover:bg-gray-100 ${index % 2 === 0 ? 'table-row-even' : 'table-row-odd'}`;
+                    let rowHtml = `<td class="py-3 px-6 text-left whitespace-now-wrap font-medium">Mano ${index + 1}</td>`;
+                    
+                    for (const name in players) {
+                        const score = round.scores[name] || 0;
+                        cumulativeScores[name] += score;
+                        rowHtml += `<td class="py-3 px-6 text-center">${cumulativeScores[name]}</td>`;
+                    }
+                    row.innerHTML = rowHtml;
+                    scoreTableBody.appendChild(row);
+                });
+
+                // Aggiungi la riga del totale
+                const totalRow = document.createElement('tr');
+                totalRow.className = 'border-b border-gray-200 bg-blue-100 font-bold';
+                let totalRowHtml = `<td class="py-3 px-6 text-left whitespace-now-wrap">Totale</td>`;
+                for (const name in players) {
+                    totalRowHtml += `<td class="py-3 px-6 text-center">${players[name].score}</td>`;
+                }
+                totalRow.innerHTML = totalRowHtml;
+                scoreTableBody.appendChild(totalRow);
+            }
+
+            // Funzione per renderizzare i campi di input per i punteggi di ogni giocatore
+            function renderScoreInputs() {
+                scoreInputsContainer.innerHTML = '';
+                for (const name in players) {
+                    const inputGroup = document.createElement('div');
+                    inputGroup.className = 'flex items-center gap-2';
+                    
+                    const label = document.createElement('label');
+                    label.textContent = name + ':';
+                    label.className = 'block text-sm font-medium text-gray-700 w-1/3';
+                    
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.placeholder = `Punti ${currentPhase === 'chiusura' ? 'di chiusura' : 'rimanenti'}`;
+                    input.className = 'mt-1 block w-1/3 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500';
+                    input.setAttribute('data-name', name);
+                    input.addEventListener('input', () => {
+                        updateProvisionalScore(name, input.value);
+                    });
+
+                    const provisionalScore = document.createElement('span');
+                    provisionalScore.id = `provisional-${name}`;
+                    provisionalScore.className = 'w-1/3 text-lg font-bold text-right text-gray-800';
+                    provisionalScore.textContent = '0';
+                    
+                    inputGroup.appendChild(label);
+                    inputGroup.appendChild(input);
+                    inputGroup.appendChild(provisionalScore);
+                    scoreInputsContainer.appendChild(inputGroup);
+                }
+            }
+            
+            function updateProvisionalScore(name, value) {
+                const provisionalElement = document.getElementById(`provisional-${name}`);
+                const points = parseInt(value) || 0;
+                if (currentPhase === 'chiusura') {
+                    provisionalElement.textContent = points;
+                } else {
+                    const closurePoints = roundScores[name] || 0;
+                    provisionalElement.textContent = closurePoints + points;
+                }
+            }
+            
+            // Funzione per aggiungere un giocatore all'elenco
+            function addPlayerToList(name) {
+                const li = document.createElement('li');
+                li.textContent = name;
+                playerList.appendChild(li);
+            }
+
+            // Funzione per aggiungere un giocatore
+            window.addPlayer = function() {
+                const name = playerNameInput.value.trim();
+                if (name && !players[name]) {
+                    players[name] = { name: name, score: 0 };
+                    playerNameInput.value = '';
+                    addPlayerToList(name);
+                    showMessage(`Giocatore "${name}" aggiunto!`, 'success');
+                } else if (players[name]) {
+                    showMessage('Questo giocatore esiste già.');
+                } else {
+                    showMessage('Per favore, inserisci un nome valido.');
+                }
+            };
+
+            // Funzione per passare alla schermata di gioco
+            function startGame() {
+                if (Object.keys(players).length < 2) {
+                    showMessage('Aggiungi almeno due giocatori per iniziare la partita.');
+                    return;
+                }
+                playerSetupDiv.classList.add('hidden');
+                scoreViewDiv.classList.remove('hidden');
+                renderTable();
+                renderScoreInputs();
+                showMessage('Partita iniziata!', 'success');
+            }
+            
+            // Event listener per il pulsante di conferma
+            confirmPointsBtn.addEventListener('click', () => {
+                const inputs = scoreInputsContainer.querySelectorAll('input[type="number"]');
+
+                if (currentPhase === 'chiusura') {
+                    let hasPoints = false;
+                    inputs.forEach(input => {
+                        const name = input.getAttribute('data-name');
+                        const points = parseInt(input.value) || 0;
+                        roundScores[name] = points;
+                        if (points > 0) hasPoints = true;
+                    });
+                    
+                    if (!hasPoints) {
+                        showMessage('Per favore, inserisci almeno un punteggio di chiusura.');
+                        return;
+                    }
+                    
+                    currentPhase = 'rimanenti';
+                    scoreUpdateTitle.textContent = 'Aggiorna Punteggio - Punti Rimanenti';
+                    confirmPointsBtn.textContent = 'Conferma Punti Rimanenti';
+                    renderScoreInputs();
+                    showMessage('Punti di chiusura salvati. Ora inserisci i punti rimanenti.');
+
+                } else if (currentPhase === 'rimanenti') {
+                    const currentRoundScores = {};
+                    inputs.forEach(input => {
+                        const name = input.getAttribute('data-name');
+                        const points = parseInt(input.value) || 0;
+                        const totalRoundPoints = (roundScores[name] || 0) + points;
+                        currentRoundScores[name] = totalRoundPoints;
+                        players[name].score += totalRoundPoints;
+                    });
+                    
+                    historyScores.push({ scores: currentRoundScores });
+
+                    currentPhase = 'chiusura';
+                    scoreUpdateTitle.textContent = 'Aggiorna Punteggio - Punti di Chiusura';
+                    confirmPointsBtn.textContent = 'Conferma Punti di Chiusura';
+                    renderTable();
+                    renderScoreInputs();
+                    showMessage('Punti totali aggiornati!', 'success');
+                }
+            });
+
+            // Event listener per i pulsanti
+            addPlayerBtn.addEventListener('click', addPlayer);
+            startGameBtn.addEventListener('click', startGame);
+
+            // Permette di aggiungere il giocatore premendo Invio
+            playerNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addPlayer();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

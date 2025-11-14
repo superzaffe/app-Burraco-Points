@@ -1,0 +1,24 @@
+{
+    "name": "Burraco Points",
+    "short_name": "Burraco Points",
+    "description": "Gestore dei punti di Burraco",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#FFEB99",
+    "theme_color": "#00BFFF",
+    "icons": [
+        {
+            "src": "1763141985824.jpg",
+            "sizes": "192x192",
+            "type": "image/jpeg",
+            "purpose": "maskable"
+        },
+        {
+            "src": "1763141985824.jpg",
+            "sizes": "512x512",
+            "type": "image/jpeg",
+            "purpose": "any"
+        }
+    ]
+}
